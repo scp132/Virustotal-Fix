@@ -1,0 +1,101 @@
+This is Batch File Source code down here
+
+
+@echo off
+color 0A
+:MENU
+cls
+echo ===================================
+echo             Option Menu            
+echo ===================================
+echo 1. Run Script
+echo 2. Credits
+echo 3. Exit
+echo ===================================
+set /p choice=Choose an option:
+
+if "%choice%"=="1" goto RUN_SCRIPT
+if "%choice%"=="2" goto CREDITS
+if "%choice%"=="3" exit
+
+:RUN_SCRIPT
+cls
+echo Starting the process...
+echo Please wait while the script runs.
+
+:: Progress bar simulation
+for /L %%i in (0,10,100) do (
+    set /a progress=%%i
+    call :DisplayProgress %%i
+    if %%i lss 50 (
+        color 0A
+    ) else if %%i lss 70 (
+        color 0E
+    ) else (
+        color 04
+    )
+    timeout /t 1 >nul
+)
+
+:: Now run the script to restore hosts file to default
+:: Check if the script is running with administrator privileges
+openfiles >nul 2>&1
+if %errorlevel% NEQ 0 (
+    echo This script requires administrator privileges. Please run as administrator.
+    pause
+    exit
+)
+
+:: Backup current hosts file
+echo Backing up current hosts file...
+copy C:\Windows\System32\drivers\etc\hosts C:\Windows\System32\drivers\etc\hosts.bak
+
+:: Create a new default hosts file with default content
+echo 127.0.0.1       localhost > C:\Windows\System32\drivers\etc\hosts
+echo ::1             localhost >> C:\Windows\System32\drivers\etc\hosts
+
+:: Grant full access to the hosts file to ensure it can be modified
+takeown /f C:\Windows\System32\drivers\etc\hosts
+icacls C:\Windows\System32\drivers\etc\hosts /grant administrators:F
+
+:: Flush DNS cache to apply changes
+echo Flushing DNS cache...
+ipconfig /flushdns
+
+echo Hosts file restored to default.
+
+:: Display success message
+echo Command executed successfully!
+echo Virus Total Fixed
+
+:: Open Command Prompt 3 times and auto-close each instance
+for /L %%i in (1,1,3) do (
+    start cmd /c "timeout /t 3 >nul"
+)
+
+:: Wait for 5 seconds before automatically closing the script
+timeout /t 5 >nul
+
+exit
+
+:DisplayProgress
+:: Display the progress bar
+setlocal enabledelayedexpansion
+set bar=
+for /L %%j in (1,1,%1) do set bar=!bar!#
+set spaces=
+for /L %%j in (%1,1,100) do set spaces=!spaces!-
+echo Progress: [%bar%%spaces%] %1%%
+goto :eof
+
+:CREDITS
+cls
+echo ===================================
+echo           Credits
+echo ===================================
+echo This script was created by Clan Kv.
+echo Special thanks to KakDeLa for support.
+echo Opening Discord link...
+start https://discord.gg/YA7B6btW25
+pause
+goto MENU
